@@ -1,4 +1,4 @@
-package com.feedme.exam.feed;
+package com.feedme.exam.queue.feed;
 
 
 import javax.json.JsonObject;

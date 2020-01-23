@@ -1,6 +1,6 @@
 package com.feedme.exam;
 
-import com.feedme.exam.feed.FeedmeClient;
+import com.feedme.exam.queue.feed.FeedmeClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,6 +1,6 @@
-package com.feedme.exam;
+package com.feedme.exam.queue.write;
 
-import com.feedme.exam.feed.FeedmeClient;
+import com.feedme.exam.queue.feed.FeedmeClient;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -14,8 +14,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.nio.charset.StandardCharsets;
 
 @SpringBootApplication
-public class RabbitTestSend implements CommandLineRunner  {
-    private static final Logger LOG = LoggerFactory.getLogger(RabbitTestSend.class);
+public class RabbitMQSender implements CommandLineRunner  {
+    private static final Logger LOG = LoggerFactory.getLogger(RabbitMQSender.class);
 
     @Value("${feedme.host}")
     private String host;
@@ -43,7 +43,7 @@ public class RabbitTestSend implements CommandLineRunner  {
 
 
     public static void main(String[] args) {
-        SpringApplication.run(RabbitTestSend.class, args);
+        SpringApplication.run(RabbitMQSender.class, args);
     }
 
     @Override
@@ -63,7 +63,7 @@ public class RabbitTestSend implements CommandLineRunner  {
 
             while ((message = feedme.getNextJson()) != null) {
                 channel.basicPublish("", this.queueName, null, message.getBytes(StandardCharsets.UTF_8));
-                LOG.info(" [x] Sent '" + message + "'");
+                LOG.info("Sent '" + message + "'");
             }
             feedme.stopConnection();
         }

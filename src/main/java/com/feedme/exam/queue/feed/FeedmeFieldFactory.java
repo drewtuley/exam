@@ -1,4 +1,4 @@
-package com.feedme.exam.feed;
+package com.feedme.exam.queue.feed;
 
 import com.google.common.collect.ImmutableMap;
 import org.w3c.dom.NamedNodeMap;

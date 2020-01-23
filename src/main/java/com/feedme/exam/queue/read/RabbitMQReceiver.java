@@ -1,4 +1,4 @@
-package com.feedme.exam;
+package com.feedme.exam.queue.read;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -10,8 +10,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 
-public class RabbitTestReceiver implements CommandLineRunner {
-    private static final Logger LOG = LoggerFactory.getLogger(RabbitTestReceiver.class);
+import java.nio.charset.StandardCharsets;
+
+public class RabbitMQReceiver implements CommandLineRunner {
+    private static final Logger LOG = LoggerFactory.getLogger(RabbitMQReceiver.class);
 
     @Value("${queue.host}")
     private String queueHost;
@@ -29,7 +31,7 @@ public class RabbitTestReceiver implements CommandLineRunner {
     private String queueName;
 
     public static void main(String[] args) {
-        SpringApplication.run(RabbitTestReceiver.class, args);
+        SpringApplication.run(RabbitMQReceiver.class, args);
     }
 
 
@@ -44,11 +46,11 @@ public class RabbitTestReceiver implements CommandLineRunner {
         Channel channel = connection.createChannel();
 
         channel.queueDeclare(queueName, false, false, false, null);
-        System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
+        LOG.info("Waiting for messages.");
 
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-            String message = new String(delivery.getBody(), "UTF-8");
-            LOG.info(" [x] Received '{}'", message );
+            String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
+            LOG.info("Received '{}'", message );
         };
         channel.basicConsume(queueName, true, deliverCallback, consumerTag -> {
         });
