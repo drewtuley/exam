@@ -1,6 +1,7 @@
-package com.feedme.exam.queue.feed;
+package com.feedme.exam.queue.write.feed;
 
 import javax.json.JsonObjectBuilder;
+import java.util.List;
 
 public abstract class FeedmeField implements IFeedmeField {
     private int index;
@@ -42,5 +43,5 @@ public abstract class FeedmeField implements IFeedmeField {
     }
 
 
-    public abstract void addJson(String[] fields, JsonObjectBuilder builder);
+    public abstract void addJson(List<String> fields, JsonObjectBuilder builder);
 }

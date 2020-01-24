@@ -1,7 +1,8 @@
-package com.feedme.exam.queue.feed;
+package com.feedme.exam.queue.write.feed;
 
 import javax.json.JsonObjectBuilder;
 import java.math.BigInteger;
+import java.util.List;
 
 public class FeedmeBigInteger extends FeedmeField {
     public FeedmeBigInteger(int index, String name) {
@@ -18,8 +19,8 @@ public class FeedmeBigInteger extends FeedmeField {
     }
 
     @Override
-    public void addJson(String[] fields, JsonObjectBuilder builder) {
-        builder.add(this.getName(), this.handle(fields[this.getIndex()+1]));
+    public void addJson(List<String> fields, JsonObjectBuilder builder) {
+        builder.add(this.getName(), this.handle(fields.get(this.getIndex())));
         return ;
     }
 }

@@ -1,4 +1,4 @@
-package com.feedme.exam.queue.feed;
+package com.feedme.exam.queue.write.feed;
 
 import org.w3c.dom.*;
 

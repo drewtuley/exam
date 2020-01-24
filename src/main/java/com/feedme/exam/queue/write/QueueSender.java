@@ -1,6 +1,6 @@
 package com.feedme.exam.queue.write;
 
-import com.feedme.exam.queue.feed.FeedmeClient;
+import com.feedme.exam.queue.write.feed.FeedmeClient;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -14,8 +14,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.nio.charset.StandardCharsets;
 
 @SpringBootApplication
-public class RabbitMQSender implements CommandLineRunner  {
-    private static final Logger LOG = LoggerFactory.getLogger(RabbitMQSender.class);
+public class QueueSender implements CommandLineRunner {
+    private static final Logger LOG = LoggerFactory.getLogger(QueueSender.class);
 
     @Value("${feedme.host}")
     private String host;
@@ -32,10 +32,10 @@ public class RabbitMQSender implements CommandLineRunner  {
     @Value("${queue.vhost}")
     private String queueVhost;
 
-    @Value("${queue.username}")
+    @Value("${queue.write.username}")
     private String queueUsername;
 
-    @Value("${queue.password}")
+    @Value("${queue.write.password}")
     private String queuePassword;
 
     @Value("${queue.name}")
@@ -43,7 +43,7 @@ public class RabbitMQSender implements CommandLineRunner  {
 
 
     public static void main(String[] args) {
-        SpringApplication.run(RabbitMQSender.class, args);
+        SpringApplication.run(QueueSender.class, args);
     }
 
     @Override

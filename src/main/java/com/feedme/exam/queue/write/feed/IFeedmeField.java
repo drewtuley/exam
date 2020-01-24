@@ -1,6 +1,7 @@
-package com.feedme.exam.queue.feed;
+package com.feedme.exam.queue.write.feed;
 
 import javax.json.JsonObjectBuilder;
+import java.util.List;
 
 public interface IFeedmeField {
     public int getIndex();
@@ -9,5 +10,5 @@ public interface IFeedmeField {
     public String getName();
     public void setName(String name);
 
-    public void addJson(String[] fields, JsonObjectBuilder builder);
+    public void addJson(List<String> fields, JsonObjectBuilder builder);
 }

@@ -1,6 +1,7 @@
-package com.feedme.exam.queue.feed;
+package com.feedme.exam.queue.write.feed;
 
 import javax.json.JsonObjectBuilder;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class FeedmeString extends FeedmeField {
@@ -16,8 +17,8 @@ public class FeedmeString extends FeedmeField {
     }
 
     @Override
-    public void addJson(String[] fields, JsonObjectBuilder builder) {
-        builder.add(this.getName(), this.handle(fields[this.getIndex()+1]));
+    public void addJson(List<String> fields, JsonObjectBuilder builder) {
+        builder.add(this.getName(), this.handle(fields.get(this.getIndex())));
         return ;
     }
 }

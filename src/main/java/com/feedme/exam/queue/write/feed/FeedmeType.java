@@ -1,4 +1,4 @@
-package com.feedme.exam.queue.feed;
+package com.feedme.exam.queue.write.feed;
 
 import javax.json.*;
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ public class FeedmeType {
         sections.put(sectionName, section);
     }
 
-    private JsonArray addSection(String name, String[] fields, JsonBuilderFactory factory)
+    private JsonArray addSection(String name, List<String> fields, JsonBuilderFactory factory)
     {
         JsonObjectBuilder oBuilder = factory.createObjectBuilder();
         sections.get(name).stream().forEach(f -> f.addJson(fields, oBuilder));
@@ -33,7 +33,7 @@ public class FeedmeType {
         return factory.createArrayBuilder().add(x).build();
     }
 
-    public JsonObject buildJson(String[] fields)
+    public JsonObject buildJson(List<String> fields)
     {
         JsonBuilderFactory factory = Json.createBuilderFactory(null);
         JsonObjectBuilder builder = factory.createObjectBuilder();

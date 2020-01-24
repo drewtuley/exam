@@ -1,4 +1,4 @@
-package com.feedme.exam.queue.feed;
+package com.feedme.exam.queue.write.feed;
 
 
 import javax.json.JsonObject;
@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -44,8 +46,8 @@ public class FeedmeClient {
         }
     }
 
-    private JsonObject convertToJson(String[] fields, Map<String, FeedmeType> typeMap) {
-        String type = fields[3];
+    private JsonObject convertToJson(List<String> fields, Map<String, FeedmeType> typeMap) {
+        String type = fields.get(2);
         JsonObject json = null;
         FeedmeType feedmeType = typeMap.get(type);
         if (feedmeType != null) {
@@ -55,9 +57,9 @@ public class FeedmeClient {
         return json;
     }
 
-    private String[] parseInput(String inputLine) {
-        String[] fields = inputLine.split(NOT_SLASH_PIPE.pattern());
-        assert (fields.length > 0);
+    private List<String> parseInput(String inputLine) {
+        String sanitised = inputLine.replaceFirst("^\\|", "");
+        List<String> fields = Arrays.asList(sanitised.split(NOT_SLASH_PIPE.pattern()));
 
         return fields;
     }
