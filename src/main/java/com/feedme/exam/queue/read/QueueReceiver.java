@@ -2,10 +2,14 @@ package com.feedme.exam.queue.read;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.UpdateOptions;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +19,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Updates.addToSet;
 
 @SpringBootApplication
 public class QueueReceiver implements CommandLineRunner {
@@ -36,7 +44,7 @@ public class QueueReceiver implements CommandLineRunner {
     private String queueName;
 
     @Autowired
-    private EventDao eventDao;
+    private MongoCollection<Document> collection;
 
 
     public static void main(String[] args) {
@@ -62,85 +70,58 @@ public class QueueReceiver implements CommandLineRunner {
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
             JsonObject jsonObj = JsonParser.parseString(message).getAsJsonObject();
             //LOG.info("Received '{}'", jsonObj.toString() );
-            JsonObject header = jsonObj.getAsJsonArray("header").get(0).getAsJsonObject();
-            JsonObject body = jsonObj.getAsJsonArray("body").get(0).getAsJsonObject();
+            JsonObject header = jsonObj.getAsJsonObject("header");
+            JsonObject body = jsonObj.getAsJsonObject("body");
             String type = header.get("type").getAsString();
             String operation = header.get("operation").getAsString();
 
             //LOG.info("Got type: {} operation: {}", type, operation);
             if ("event".equals(type)) {
-                handleEvent(operation, body, message);
+                handleEvent(operation, body.get("eventId").getAsString(), message);
             } else if ("market".equals(type)) {
                 handleMarket(operation, body, message);
             } else if ("outcome".equals(type)) {
-                handleOutcome(operation, body, message);
+                handleOutcome(body, message);
             }
         };
         channel.basicConsume(queueName, true, deliverCallback, consumerTag -> {
         });
     }
 
-    private void handleOutcome(String operation, JsonObject body, String message) {
+    private void handleOutcome(JsonObject body, String json) {
+        String marketId = body.get("marketId").getAsString();
+        LOG.info("Handle outcome to market: {}", marketId);
+        Document outcomeBase = Document.parse(json);
+        collection.updateOne(eq("markets._id", marketId), addToSet("markets.$[item].outcomes", outcomeBase), new UpdateOptions()
+                .arrayFilters(
+                        Collections.singletonList(Filters.in("item._id", Collections.singletonList(marketId)))
+                ));
+    }
+
+    private void handleMarket(String operation, JsonObject body, String json) {
+        String mktEventId = body.get("eventId").getAsString();
+        String marketId = body.get("marketId").getAsString();
+        LOG.info("Handle {} to market: {} on event {}", operation, marketId, mktEventId);
         if ("create".equals(operation)) {
-            String marketId = body.get("marketId").getAsString();
-            String outcomeId = body.get("outcomeId").getAsString();
-            LOG.info("create outcome: marketid {} outcomeId {} ", marketId, outcomeId);
-            EventWrapper event = eventDao.getMarketByEventId(marketId);
-            if (event != null) {
-                event.addOutcome(marketId, outcomeId, message);
-                eventDao.updateEvent(event);
-            }
+            Document marketBase = Document.parse("{\"market\": [" + json + "]}").append("_id", marketId);
+            collection.updateOne(eq("_id", mktEventId), addToSet("markets", marketBase));
         } else if ("update".equals(operation)) {
-            String marketId = body.get("marketId").getAsString();
-            String outcomeId = body.get("outcomeId").getAsString();
-            LOG.info("update outcome: marketid {} outcomeId {} ", marketId, outcomeId);
-            EventWrapper event = eventDao.getMarketByEventId(marketId);
-            if (event != null) {
-                event.updateOutcome(marketId, outcomeId, message);
-                eventDao.updateEvent(event);
-            }
+            Document mktUpdate = Document.parse(json);
+            collection.updateOne(eq("markets._id", marketId), addToSet("markets.$[item].market", mktUpdate), new UpdateOptions()
+                    .arrayFilters(
+                            Collections.singletonList(Filters.in("item._id", Collections.singletonList(marketId)))
+                    ));
         }
     }
 
-    private void handleMarket(String operation, JsonObject body, String message) {
+    private void handleEvent(String operation, String eventId, String json) {
+        LOG.info("Handle {} to event: {}", operation, eventId);
         if ("create".equals(operation)) {
-            String eventId = body.get("eventId").getAsString();
-            String marketId = body.get("marketId").getAsString();
-            LOG.info("create market: eventid {} marketid {}", eventId, marketId);
-            EventWrapper event = eventDao.getEventById(eventId);
-            if (event != null) {
-                event.addMarket(marketId, message);
-                eventDao.updateEvent(event);
-                eventDao.addEventMarketLink(eventId, marketId);
-            }
+            Document fixture = Document.parse("{\"events\":[" + json + "], \"markets\":[]}").append("_id", eventId);
+            collection.insertOne(fixture);
         } else if ("update".equals(operation)) {
-            String eventId = body.get("eventId").getAsString();
-            String marketId = body.get("marketId").getAsString();
-            LOG.info("update market: eventid {} marketid {}", eventId, marketId);
-            EventWrapper event = eventDao.getEventById(eventId);
-            if (event != null) {
-                event.updateMarket(marketId, message);
-                eventDao.updateEvent(event);
-            }
-        }
-    }
-
-    private void handleEvent(String operation, JsonObject body, String message) {
-        if ("create".equals(operation)) {
-
-            String eventId = body.get("eventId").getAsString();
-            LOG.info("create event id {}", eventId);
-            EventWrapper wrapper = new EventWrapper(eventId, message);
-            eventDao.saveEvent(wrapper);
-        } else if ("update".equals(operation)) {
-            String eventId = body.get("eventId").getAsString();
-            LOG.info("update event id {}", eventId);
-            EventWrapper event = eventDao.getEventById(eventId);
-            if (event != null) {
-                LOG.info("returned event id: {}", event.getEventId());
-                event.addEventUpdate(message);
-                eventDao.updateEvent(event);
-            }
+            Document event2 = Document.parse(json);
+            collection.updateOne(eq("_id", eventId), addToSet("events", event2));
         }
     }
 }

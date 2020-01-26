@@ -1,19 +1,16 @@
 package com.feedme.exam.queue.write.feed;
 
-import javax.json.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import com.google.common.collect.ImmutableList;
+
+import javax.json.Json;
+import javax.json.JsonBuilderFactory;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import java.util.*;
 
 
 public class FeedmeType {
-    private String typeName;
-    private Map<String, List<FeedmeField>> sections = new TreeMap();
-
-    public FeedmeType(String name) {
-        this.typeName = name;
-    }
+    private final Map<String, List<FeedmeField>> sections = new HashMap<>();
 
     public void addFieldToSection(String sectionName, FeedmeField field) {
         List<FeedmeField> section = sections.get(sectionName);
@@ -24,23 +21,50 @@ public class FeedmeType {
         sections.put(sectionName, section);
     }
 
-    private JsonArray addSection(String name, List<String> fields, JsonBuilderFactory factory)
-    {
-        JsonObjectBuilder oBuilder = factory.createObjectBuilder();
-        sections.get(name).stream().forEach(f -> f.addJson(fields, oBuilder));
+    private JsonObject addSection(String name, List<String> fields, JsonObjectBuilder oBuilder) {
+        sections.get(name).forEach(f -> {
+            String value = fields.get(f.getIndex());
+            f.addJson(value, oBuilder);
+        });
 
-        JsonObject x = oBuilder.build();
-        return factory.createArrayBuilder().add(x).build();
+        return oBuilder.build();
     }
 
-    public JsonObject buildJson(List<String> fields)
-    {
+    public JsonObject buildJson(List<String> fields) {
         JsonBuilderFactory factory = Json.createBuilderFactory(null);
         JsonObjectBuilder builder = factory.createObjectBuilder();
-        sections.keySet().stream().forEach(key -> builder.add(key, factory.createArrayBuilder(addSection(key, fields, factory))));
+        JsonObjectBuilder innerBuilder = factory.createObjectBuilder();
+
+        sections.keySet().forEach(key -> builder.add(key, addSection(key, fields, innerBuilder)));
 
         return builder.build();
     }
 
+    public static void main(String[] args) {
+        test();
+    }
+
+    private static void test() {
+        JsonBuilderFactory factory = Json.createBuilderFactory(null);
+        JsonObjectBuilder builder = factory.createObjectBuilder();
+
+        JsonObject body = builder.add("eventId", "1234-4321").add("type", "event").build();
+        JsonObject main = builder.add("body", body).build();
+        System.out.println(main.toString());
+
+        ImmutableList<String> numbers = ImmutableList.of("10", "20", "30", "40");
+        ImmutableList<String> sections = ImmutableList.of("one", "two");
+
+        JsonObjectBuilder obuilder = factory.createObjectBuilder();
+
+        sections.forEach(sect -> {
+            numbers.forEach(n -> builder.add(n, Integer.parseInt(n)));
+            JsonObject x = builder.build();
+            obuilder.add(sect, x);
+        });
+
+        main = obuilder.build();
+        System.out.println(main.toString());
+    }
 
 }

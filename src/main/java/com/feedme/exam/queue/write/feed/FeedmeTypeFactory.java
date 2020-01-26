@@ -4,12 +4,12 @@ import org.w3c.dom.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 
 public class FeedmeTypeFactory {
-    private static FeedmeTypeFactory ourInstance = new FeedmeTypeFactory();
+    private static final FeedmeTypeFactory ourInstance = new FeedmeTypeFactory();
 
     public static FeedmeTypeFactory getInstance() {
         return ourInstance;
@@ -17,10 +17,10 @@ public class FeedmeTypeFactory {
 
     private FeedmeTypeFactory() {
     }
-    
-    public Map<String, FeedmeType> getFeedmeTypes(String uri){
-        Map<String, FeedmeType> typeMap = new TreeMap();
-        
+
+    public Map<String, FeedmeType> getFeedmeTypes(String uri) {
+        Map<String, FeedmeType> typeMap = new HashMap<>();
+
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
@@ -35,7 +35,7 @@ public class FeedmeTypeFactory {
                 Node node = typeNodes.item(idx);
                 if (Node.ELEMENT_NODE == node.getNodeType()) {
                     String typeName = node.getNodeName();
-                    FeedmeType type = new FeedmeType(typeName);
+                    FeedmeType type = new FeedmeType();
 
                     NodeList subNodes = node.getChildNodes();
                     for (int subIdx = 0; subIdx < subNodes.getLength(); subIdx++) {
@@ -43,7 +43,7 @@ public class FeedmeTypeFactory {
                         if (Node.ELEMENT_NODE == subNode.getNodeType()) {
                             String sectionName = subNode.getNodeName();
                             NodeList fieldNodes = subNode.getChildNodes();
-                            for (int fIdx = 0; fIdx<fieldNodes.getLength(); fIdx++) {
+                            for (int fIdx = 0; fIdx < fieldNodes.getLength(); fIdx++) {
                                 Node fieldNode = fieldNodes.item(fIdx);
                                 if (Node.ELEMENT_NODE == fieldNode.getNodeType()) {
                                     NamedNodeMap attribs = fieldNode.getAttributes();
@@ -60,15 +60,15 @@ public class FeedmeTypeFactory {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         return typeMap;
     }
-    
+
     public static void main(String[] args) {
         FeedmeTypeFactory factory = FeedmeTypeFactory.getInstance();
         Map<String, FeedmeType> map = factory.getFeedmeTypes("http://localhost:8181/types");
         for (String type : map.keySet()) {
-            System.out.println("name="+type);
+            System.out.println("name=" + type);
         }
     }
 }

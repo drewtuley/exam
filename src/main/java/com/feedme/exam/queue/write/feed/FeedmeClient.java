@@ -59,9 +59,7 @@ public class FeedmeClient {
 
     private List<String> parseInput(String inputLine) {
         String sanitised = inputLine.replaceFirst("^\\|", "");
-        List<String> fields = Arrays.asList(sanitised.split(NOT_SLASH_PIPE.pattern()));
-
-        return fields;
+        return Arrays.asList(sanitised.split(NOT_SLASH_PIPE.pattern()));
     }
 
 

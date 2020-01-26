@@ -1,26 +1,23 @@
 package com.feedme.exam.queue.write.feed;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.json.JsonObjectBuilder;
 import java.math.BigInteger;
-import java.util.List;
 
 public class FeedmeBigInteger extends FeedmeField {
-    public FeedmeBigInteger(int index, String name) {
-        super(index, name);
-    }
 
     public FeedmeBigInteger() {
         super();
     }
-    private BigInteger handle(String integer)
-    {
-        BigInteger i = new BigInteger(integer);
-        return i;
+
+    @NotNull
+    private BigInteger handle(String integer) {
+        return new BigInteger(integer);
     }
 
-    @Override
-    public void addJson(List<String> fields, JsonObjectBuilder builder) {
-        builder.add(this.getName(), this.handle(fields.get(this.getIndex())));
-        return ;
+    public void addJson(String value, @NotNull JsonObjectBuilder builder) {
+        builder.add(this.getName(), this.handle(value));
     }
+
 }

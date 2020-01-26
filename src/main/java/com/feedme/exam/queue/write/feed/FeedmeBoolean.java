@@ -1,14 +1,11 @@
 package com.feedme.exam.queue.write.feed;
 
 import javax.json.JsonObjectBuilder;
-import java.util.List;
 
 public class FeedmeBoolean extends FeedmeField {
-    public FeedmeBoolean(int index, String name) {
-        super(index, name);
-    }
 
-    public FeedmeBoolean(){}
+    public FeedmeBoolean() {
+    }
 
     private Boolean handle(String s) {
         if ("1".equals(s)) {
@@ -21,8 +18,7 @@ public class FeedmeBoolean extends FeedmeField {
     }
 
     @Override
-    public void addJson(List<String> fields, JsonObjectBuilder builder) {
-        builder.add(this.getName(), this.handle(fields.get(this.getIndex())));
-        return ;
+    public void addJson(String value, JsonObjectBuilder builder) {
+        builder.add(this.getName(), this.handle(value));
     }
 }

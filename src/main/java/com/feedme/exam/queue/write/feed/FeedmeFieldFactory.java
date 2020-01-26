@@ -9,7 +9,7 @@ import java.util.function.Function;
 
 
 public class FeedmeFieldFactory {
-    private static FeedmeFieldFactory ourInstance = new FeedmeFieldFactory();
+    private static final FeedmeFieldFactory ourInstance = new FeedmeFieldFactory();
 
     private final Map<String, Function<String, FeedmeField>> MAPPED_FIELDS;
 
@@ -32,7 +32,7 @@ public class FeedmeFieldFactory {
         Node name = spec.getNamedItem("name");
         int idx = Integer.parseInt(index.getNodeValue());
 
-        FeedmeField feedField =  MAPPED_FIELDS.get(dataType.getNodeValue()).apply("");
+        FeedmeField feedField = MAPPED_FIELDS.get(dataType.getNodeValue()).apply("");
         feedField.setIndex(idx);
         feedField.setName(name.getNodeValue());
 
