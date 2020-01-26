@@ -52,7 +52,6 @@ public class FeedmeClient {
         FeedmeType feedmeType = typeMap.get(type);
         if (feedmeType != null) {
             json = feedmeType.buildJson(fields);
-
         }
         return json;
     }
